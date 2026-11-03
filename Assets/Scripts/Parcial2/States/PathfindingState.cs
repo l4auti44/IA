@@ -10,34 +10,38 @@ public class PathfindingState : States
     private Node startNode;
     private int _currentNodeIndex = 0;
 
-    private bool _isReturning = false;
 
-    public PathfindingState(FSMEnemy f, Enemy _enemy, List<Node> _path)
+
+    public PathfindingState(FSMEnemy f, Enemy _enemy)
     {
         this.fsm = f;
         this._enemy = _enemy;
-        this._path = _path;
-        
+
     }
     public override void OnEnter()
     {
-        if(_enemy != null && _path != null && _path.Count != 0)
+        FindStartNode();
+    }
+
+    private void FindStartNode()
+    {
+        if (_enemy != null && GameManager.Instance != null && GameManager.Instance.nodes.Count != 0)
         {
-            
+
             var currentDistance = float.MaxValue;
-            foreach (Node node in _path)
+            foreach (Node node in GameManager.Instance.nodes)
             {
                 float distance = Vector3.Distance(_enemy.transform.position, node.transform.position);
                 if (distance < currentDistance)
                 {
                     currentDistance = distance;
                     startNode = node;
-                    Debug.Log("Start Node: " + startNode.name);
+                    //Debug.Log("Start Node: " + startNode.name);
                 }
             }
             if (_enemy != null && startNode != null)
             {
-                _path = _enemy._pathfinding.AStar(startNode, _enemy.playerNodePosition);
+                _path = _enemy._pathfinding.AStar(startNode, _enemy.targetNodePosition);
             }
         }
     }
@@ -49,13 +53,15 @@ public class PathfindingState : States
 
     public override void OnUpdate()
     {
-        
-        
-            if(_path != null && _path.Count > 0)
-            {
-                MovementChase();
-            }
-        
+        // SI EL PLAYER ESTA DENTRO DEL FOV, CAMBIAR A CHASESTATE
+
+
+
+        if (_path != null && _path.Count > 0)
+        {
+            MovementChase();
+        }
+
     }
 
     public void MovementChase()
@@ -65,7 +71,7 @@ public class PathfindingState : States
         {
             return;
         }
-        
+
         Node nextNode = _path[_currentNodeIndex];
 
         _enemy.transform.position = Vector3.MoveTowards(
@@ -76,30 +82,20 @@ public class PathfindingState : States
 
         if (Vector3.Distance(_enemy.transform.position, nextNode.transform.position) < 0.1f)
         {
-
             _currentNodeIndex++;
 
             if (_currentNodeIndex >= _path.Count)
             {
-                if (!_isReturning)
-                {
-                    
-                    _path.Reverse();
-                    _currentNodeIndex = 0;
-                    _isReturning = true;
-                }
-                else
-                {
-                    
-                    fsm.ChangeState(EnemyStates.Patrol);
-                }
+
+                // LLEGUE
+                fsm.ChangeState(EnemyStates.Patrol);
             }
-            
+
         }
 
-        
+
     }
 
-    
+
 
 }

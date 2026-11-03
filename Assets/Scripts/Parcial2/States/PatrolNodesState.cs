@@ -19,17 +19,29 @@ public class PatrolNodesState : States
 
     public override void OnEnter()
     {
-        
+        // ESTOY CERCA DEL target node?
+        if (Vector3.Distance(_enemy.transform.position, _path[_lastNodeIndex].transform.position) < 0.1f)
+        {
+            Debug.Log("Estoy cerca de la zona de patrulla, patrullo");
+            // SÍ. Continúo patrullando
+            return;
+        }
+
+        Debug.Log("No estoy cerca del target node, cambio a pathfinding");
+        //el nodo mas cercano del enemigo al path
+        _enemy.targetNodePosition = _path[_lastNodeIndex];
+        fsm.ChangeState(EnemyStates.Pathfinding);
     }
 
 
     public override void OnUpdate()
     {
-        if(_enemy != null && _path != null && _path.Count != 0)
+
+        if (_enemy != null && _path != null && _path.Count != 0)
         {
             Movement();
         }
-        
+
     }
     public override void OnExit()
     {
@@ -42,9 +54,9 @@ public class PatrolNodesState : States
         if (_path == null || _path.Count == 0)
         {
             return;
-            
+
         }
-        
+
         Node nextNode = _path[_currentNodeIndex];
 
         _enemy.transform.position = Vector3.MoveTowards(
@@ -62,7 +74,7 @@ public class PatrolNodesState : States
             {
                 _currentNodeIndex = 0;
             }
-            
+
         }
     }
 

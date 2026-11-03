@@ -13,7 +13,7 @@ public class Pathfinding
     public List<Node> AStar(Node start, Node end)
     {
 
-        
+
         if (start == null || end == null) return null;
 
         PriorityQueue frontier = new PriorityQueue();
@@ -42,10 +42,6 @@ public class Pathfinding
                     prev = cameFrom[prev];
                 }
 
-                foreach (Node node in path)
-                {
-                    //GameManager.instance.PaintGameObject(node.gameObject, Color.magenta);
-                }
                 path.Reverse();
                 return path;
             }
