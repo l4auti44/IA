@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 
+
 public class Enemy : MonoBehaviour
 {
 
@@ -24,13 +25,16 @@ public class Enemy : MonoBehaviour
         _fsm = new FSMEnemy();
         _fsm.AddStates(EnemyStates.Patrol, new PatrolNodesState(_fsm, this, _path));
         _fsm.AddStates(EnemyStates.Pathfinding, new PathfindingState(_fsm, this, _path));
-        //_fsm.ChangeState(EnemyStates.Patrol);
-        _fsm.ChangeState(EnemyStates.Pathfinding);
+        _fsm.ChangeState(EnemyStates.Patrol);
+        
     }
     // Update is called once per frame
     void Update()
     {
-        
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            _fsm.ChangeState(EnemyStates.Pathfinding);
+        }
         _fsm.Update();
     }
     

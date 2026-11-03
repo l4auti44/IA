@@ -38,7 +38,7 @@ public class Pathfinding
                 Node prev = current;
                 while (prev != null)
                 {
-                    path.Insert(0, prev);
+                    path.Add(prev);
                     prev = cameFrom[prev];
                 }
 
@@ -46,6 +46,7 @@ public class Pathfinding
                 {
                     //GameManager.instance.PaintGameObject(node.gameObject, Color.magenta);
                 }
+                path.Reverse();
                 return path;
             }
 

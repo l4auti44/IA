@@ -44,7 +44,7 @@ public class PathfindingState : States
 
     public override void OnExit()
     {
-        
+        _currentNodeIndex = 0;
     }
 
     public override void OnUpdate()
