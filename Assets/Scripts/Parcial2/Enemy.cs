@@ -21,7 +21,7 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     public Node playerNodePosition; //TEMPORAL, es para mockear el nodo donde está el player, en un futuro se va a calcular con el player y el grid
 
-
+    public bool investigating = false;
 
 
 
@@ -44,6 +44,7 @@ public class Enemy : MonoBehaviour
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             targetNodePosition = playerNodePosition;
+            investigating = true;
             _fsm.ChangeState(EnemyStates.Pathfinding);
         }
         //EN CHASE STATE, SI EL PLAYER SALE DEL FOV, CAMBIAR A PATHFINDINGSTATE PARA QUE VUELVA A LA POSICION DE PATROL

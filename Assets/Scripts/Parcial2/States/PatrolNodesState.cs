@@ -4,32 +4,41 @@ using System.Collections.Generic;
 public class PatrolNodesState : States
 {
     private Enemy _enemy;
-    private List<Node> _path;
+    private List<Node> _pathPatrol;
     private int _patrolSpeed = 5;
     private int _currentNodeIndex = 0;
-    private int _lastNodeIndex = 0;
+
 
     public PatrolNodesState(FSMEnemy f, Enemy _enemy, List<Node> path)
     {
         this.fsm = f;
         this._enemy = _enemy;
-        this._path = path;
+        this._pathPatrol = path;
     }
 
 
     public override void OnEnter()
     {
-        // ESTOY CERCA DEL target node?
-        if (Vector3.Distance(_enemy.transform.position, _path[_lastNodeIndex].transform.position) < 0.1f)
+
+        _enemy.investigating = false;
+
+        if (_pathPatrol.Contains(_enemy.targetNodePosition))
+        {
+            _currentNodeIndex = _pathPatrol.IndexOf(_enemy.targetNodePosition);
+
+        }
+        // ESTOY CERCA DEL pathpatrol
+        if (Vector3.Distance(_enemy.transform.position, _pathPatrol[_currentNodeIndex].transform.position) < 0.1f)
         {
             Debug.Log("Estoy cerca de la zona de patrulla, patrullo");
+            _currentNodeIndex = _pathPatrol.IndexOf(_enemy.targetNodePosition);
             // SÍ. Continúo patrullando
             return;
         }
 
         Debug.Log("No estoy cerca del target node, cambio a pathfinding");
         //el nodo mas cercano del enemigo al path
-        _enemy.targetNodePosition = _path[_lastNodeIndex];
+        _enemy.targetNodePosition = _pathPatrol[_currentNodeIndex];
         fsm.ChangeState(EnemyStates.Pathfinding);
     }
 
@@ -37,7 +46,7 @@ public class PatrolNodesState : States
     public override void OnUpdate()
     {
 
-        if (_enemy != null && _path != null && _path.Count != 0)
+        if (_enemy != null && _pathPatrol != null && _pathPatrol.Count != 0)
         {
             Movement();
         }
@@ -45,19 +54,19 @@ public class PatrolNodesState : States
     }
     public override void OnExit()
     {
-        _lastNodeIndex = _currentNodeIndex;
+        
     }
 
     public void Movement()
     {
 
-        if (_path == null || _path.Count == 0)
+        if (_pathPatrol == null || _pathPatrol.Count == 0)
         {
             return;
 
         }
 
-        Node nextNode = _path[_currentNodeIndex];
+        Node nextNode = _pathPatrol[_currentNodeIndex];
 
         _enemy.transform.position = Vector3.MoveTowards(
             _enemy.transform.position,
@@ -70,7 +79,7 @@ public class PatrolNodesState : States
 
             _currentNodeIndex++;
 
-            if (_currentNodeIndex >= _path.Count)
+            if (_currentNodeIndex >= _pathPatrol.Count)
             {
                 _currentNodeIndex = 0;
             }

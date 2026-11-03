@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class PathfindingState : States
 {
@@ -42,6 +43,21 @@ public class PathfindingState : States
             if (_enemy != null && startNode != null)
             {
                 _path = _enemy._pathfinding.AStar(startNode, _enemy.targetNodePosition);
+
+                if (!_enemy.investigating)
+                {
+                    foreach (Node node in _path)
+                    {
+                        if (_enemy._pathPatrol.Contains(node))
+                        {
+                            //cut path to the node that is in the patrol path
+                            int index = _path.IndexOf(node);
+                            _path = _path.Take(index + 1).ToList();
+                            _enemy.targetNodePosition = node;
+                            break;
+                        }
+                    }
+                }
             }
         }
     }
