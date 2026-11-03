@@ -13,7 +13,7 @@ public class Node : MonoBehaviour, IPointerClickHandler
     public bool isBlock = false;
     public int cost = 1;
     [SerializeField] TextMeshProUGUI textCost;
-   
+
 
     public void Initialize(int x, int y, Grid g)
     {
@@ -25,24 +25,7 @@ public class Node : MonoBehaviour, IPointerClickHandler
 
     public List<Node> GetNeighbors()
     {
-        /*
-        if(_neighbors.Count > 0) return _neighbors;
-
-        Node newNeighbor = _grid.GetNode(_x, _y + 1); //Up
-        if(newNeighbor != null) _neighbors.Add(newNeighbor);
-
-        newNeighbor = _grid.GetNode(_x, _y - 1); //Down
-        if (newNeighbor != null) _neighbors.Add(newNeighbor);
-
-        newNeighbor = _grid.GetNode(_x + 1, _y); // Right
-        if (newNeighbor != null) _neighbors.Add(newNeighbor);
-
-        newNeighbor = _grid.GetNode(_x - 1, _y); // Left
-        if (newNeighbor != null) _neighbors.Add(newNeighbor);
-
         return _neighbors;
-        */
-        return null;
     }
 
     private void OnDrawGizmosSelected()

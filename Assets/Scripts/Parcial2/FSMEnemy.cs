@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public class FSMEnemy
 {
-    Dictionary<PlayerStates, States> _allStates = new Dictionary<PlayerStates, States>();
+    Dictionary<EnemyStates, States> _allStates = new Dictionary<EnemyStates, States>();
     States _currentState;
 
     public void Update()
@@ -10,7 +10,7 @@ public class FSMEnemy
         _currentState?.OnUpdate();
     }
 
-    public void AddStates(PlayerStates name, States state)
+    public void AddStates(EnemyStates name, States state)
     {
         if (!_allStates.ContainsKey(name)) 
         {
@@ -22,7 +22,7 @@ public class FSMEnemy
         }
     }
 
-    public void ChangeState(PlayerStates name)
+    public void ChangeState(EnemyStates name)
     {
         if (!_allStates.TryGetValue(name, out States nextState) || nextState == null)
         {

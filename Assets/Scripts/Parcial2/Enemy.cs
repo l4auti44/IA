@@ -1,19 +1,37 @@
 using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 public class Enemy : MonoBehaviour
 {
+
+    [SerializeField]
     private FSMEnemy _fsm;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public Pathfinding _pathfinding;
+
+    private int _currentNodeIndex = 0;
+
+    [SerializeField]
+    private List<Node> _path = new List<Node>();
+    
+    [SerializeField]
+    public Node playerNodePosition;
+
+
     void Start()
     {
+        _pathfinding = new Pathfinding();
         _fsm = new FSMEnemy();
-        //_fsm.AddStates(PlayerStates.Patrol, new PatrolState(this));
-        //_fsm.ChangeState(PlayerStates.Patrol);
+        _fsm.AddStates(EnemyStates.Patrol, new PatrolNodesState(_fsm, this, _path));
+        _fsm.AddStates(EnemyStates.Pathfinding, new PathfindingState(_fsm, this, _path));
+        //_fsm.ChangeState(EnemyStates.Patrol);
+        _fsm.ChangeState(EnemyStates.Pathfinding);
     }
-
     // Update is called once per frame
     void Update()
     {
         
+        _fsm.Update();
     }
+    
 }

@@ -4,5 +4,5 @@ public abstract class States
     public abstract void OnUpdate();
     public abstract void OnExit();
 
-    public FiniteStateMachine fsm;
+    public FSMEnemy fsm;
 }

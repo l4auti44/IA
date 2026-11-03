@@ -12,6 +12,8 @@ public class Pathfinding
 
     public List<Node> AStar(Node start, Node end)
     {
+
+        
         if (start == null || end == null) return null;
 
         PriorityQueue frontier = new PriorityQueue();
@@ -36,7 +38,7 @@ public class Pathfinding
                 Node prev = current;
                 while (prev != null)
                 {
-                    path.Add(prev);
+                    path.Insert(0, prev);
                     prev = cameFrom[prev];
                 }
 
@@ -44,13 +46,12 @@ public class Pathfinding
                 {
                     //GameManager.instance.PaintGameObject(node.gameObject, Color.magenta);
                 }
-
                 return path;
             }
 
             foreach (Node next in current.GetNeighbors())
             {
-                if (next.isBlock) continue;
+                if (next == null || next.isBlock) continue;
 
                 float heuristic = (end.transform.position - next.transform.position).magnitude;
                 float newCost = costSoFar[current] + next.cost;
