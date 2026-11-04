@@ -17,16 +17,17 @@ public class FOV : MonoBehaviour
         foreach(GameObject obj in _viewObjects)
         {
             Vector3 dir = obj.transform.position - transform.position;
+            dir.z = 0f;
 
             if (dir.magnitude < _range)
             {
                 obj.GetComponent<Renderer>().material.color = Color.white;
                 //esta en el posible rango de vision y veo si esta dentro del ANGULO de vision.
-                if(Vector3.Angle(transform.up, dir) < _viewAngle/2)
+                if(Vector2.Angle(transform.up, dir) < _viewAngle/2)
                 {
-                    if(!Physics.Raycast(transform.position, dir, out RaycastHit hit,_range, _wallLayer))//LineOfSight, si no choco con la pared
+                    if(!Physics.Raycast(transform.position, dir, out RaycastHit hit, dir.magnitude, _wallLayer))//LineOfSight, si no choco con la pared
                     {
-                        Debug.DrawLine(transform.position, obj.transform.position, Color.white);
+                        Debug.DrawLine(transform.position, transform.position + dir, Color.white);
                         obj.GetComponent<Renderer>().material.color = Color.blue;
                         continue;
                     }
