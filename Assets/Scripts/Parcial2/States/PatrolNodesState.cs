@@ -5,7 +5,7 @@ public class PatrolNodesState : States
 {
     private Enemy _enemy;
     private List<Node> _pathPatrol;
-    private int _patrolSpeed = 0;
+    private int _patrolSpeed = 6;
     private int _currentNodeIndex = 0;
 
 
@@ -73,6 +73,7 @@ public class PatrolNodesState : States
             nextNode.transform.position,
             Time.deltaTime * _patrolSpeed
         );
+        _enemy.transform.up = (nextNode.transform.position - _enemy.transform.position).normalized;
 
         if (Vector3.Distance(_enemy.transform.position, nextNode.transform.position) < 0.1f)
         {

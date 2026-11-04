@@ -5,7 +5,7 @@ using System.Linq;
 public class PathfindingState : States
 {
 
-    private int _chaseSpeed = 0;
+    private int _chaseSpeed = 8;
     private Enemy _enemy;
     private List<Node> _path;
     private Node startNode;
@@ -95,6 +95,8 @@ public class PathfindingState : States
             nextNode.transform.position,
             Time.deltaTime * _chaseSpeed
         );
+
+        _enemy.transform.up = (nextNode.transform.position - _enemy.transform.position).normalized;
 
         if (Vector3.Distance(_enemy.transform.position, nextNode.transform.position) < 0.1f)
         {
