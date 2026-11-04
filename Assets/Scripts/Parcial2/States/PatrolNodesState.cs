@@ -21,7 +21,9 @@ public class PatrolNodesState : States
 
     public override void OnEnter()
     {
+        _enemy.Fov.OnPlayerDetected += OnPlayerDetected;
         EventManager.Subscribe<PlayerFoundData>(InvestigatePos);
+        
 
         
         _enemy.investigating = false;
@@ -50,8 +52,6 @@ public class PatrolNodesState : States
     public override void OnUpdate()
     {
 
-        
-
         if (_enemy != null && _pathPatrol != null && _pathPatrol.Count != 0)
         {
             Movement();
@@ -60,7 +60,9 @@ public class PatrolNodesState : States
     }
     public override void OnExit()
     {
+        _enemy.Fov.OnPlayerDetected -= OnPlayerDetected;
         EventManager.Unsubscribe<PlayerFoundData>(InvestigatePos);
+        
     }
 
     public void Movement()

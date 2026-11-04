@@ -44,8 +44,9 @@ public class FOV : MonoBehaviour
                             target = obj.transform;
                             Node nearestNode;
                             GameManager.Instance.FindNearestNode(target.position, out nearestNode);
-                            EventManager.Raise<PlayerFoundData>(new PlayerFoundData(nearestNode));
                             OnPlayerDetected?.Invoke(true);
+                            EventManager.Raise<PlayerFoundData>(new PlayerFoundData(nearestNode));
+
                         }
                         continue;
                     }
