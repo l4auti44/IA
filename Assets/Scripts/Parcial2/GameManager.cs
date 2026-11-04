@@ -19,5 +19,20 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    public void FindNearestNode(Vector3 position, out Node nearestNode)
+    {
+        nearestNode = null;
+        var currentDistance = float.MaxValue;
+        foreach (Node node in Instance.nodes)
+        {
+            float distance = Vector3.Distance(position, node.transform.position);
+            if (distance < currentDistance)
+            {
+                currentDistance = distance;
+                nearestNode = node;
+            }
+        }
+    }
+
 
 }

@@ -1,3 +1,4 @@
+using Patterns.Observer.Struct_EventManager;
 using UnityEngine;
 
 public class FOV : MonoBehaviour
@@ -41,6 +42,9 @@ public class FOV : MonoBehaviour
                         {
                             _isPlayerInFOV = true;
                             target = obj.transform;
+                            Node nearestNode;
+                            GameManager.Instance.FindNearestNode(target.position, out nearestNode);
+                            EventManager.Raise<PlayerFoundData>(new PlayerFoundData(nearestNode));
                             OnPlayerDetected?.Invoke(true);
                         }
                         continue;

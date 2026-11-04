@@ -30,19 +30,9 @@ public class PathfindingState : States
     {
         if (_enemy != null && GameManager.Instance != null && GameManager.Instance.nodes.Count != 0)
         {
-
-            var currentDistance = float.MaxValue;
-            foreach (Node node in GameManager.Instance.nodes)
-            {
-                float distance = Vector3.Distance(_enemy.transform.position, node.transform.position);
-                if (distance < currentDistance)
-                {
-                    currentDistance = distance;
-                    startNode = node;
-                    //Debug.Log("Start Node: " + startNode.name);
-                }
-            }
-            if (_enemy != null && startNode != null)
+            GameManager.Instance.FindNearestNode(_enemy.transform.position, out startNode);
+            
+            if (startNode != null)
             {
                 _path = _enemy._pathfinding.AStar(startNode, _enemy.targetNodePosition);
 

@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Patterns.Observer.Struct_EventManager;
+using System;
 
 public class PatrolNodesState : States
 {
@@ -19,7 +21,8 @@ public class PatrolNodesState : States
 
     public override void OnEnter()
     {
-        _enemy.Fov.OnPlayerDetected += OnPlayerDetected;
+        EventManager.Subscribe<PlayerFoundData>(InvestigatePos);
+
         
         _enemy.investigating = false;
 
@@ -57,7 +60,7 @@ public class PatrolNodesState : States
     }
     public override void OnExit()
     {
-        _enemy.Fov.OnPlayerDetected -= OnPlayerDetected;
+        EventManager.Unsubscribe<PlayerFoundData>(InvestigatePos);
     }
 
     public void Movement()
@@ -102,6 +105,12 @@ public class PatrolNodesState : States
             Debug.Log("Player detected! Switching to ChaseState.");
             fsm.ChangeState(EnemyStates.Chase);
         }
+    }
+    private void InvestigatePos(PlayerFoundData data)
+    {
+        _enemy.investigating = true;
+        _enemy.targetNodePosition = data.playerClosestNode;
+        fsm.ChangeState(EnemyStates.Pathfinding);
     }
 
 }
