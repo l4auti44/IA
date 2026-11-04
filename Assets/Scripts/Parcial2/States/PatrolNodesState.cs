@@ -5,7 +5,7 @@ public class PatrolNodesState : States
 {
     private Enemy _enemy;
     private List<Node> _pathPatrol;
-    private int _patrolSpeed = 5;
+    private int _patrolSpeed = 0;
     private int _currentNodeIndex = 0;
 
 

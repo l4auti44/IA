@@ -5,7 +5,7 @@ using System.Linq;
 public class PathfindingState : States
 {
 
-    private int _chaseSpeed = 8;
+    private int _chaseSpeed = 0;
     private Enemy _enemy;
     private List<Node> _path;
     private Node startNode;
