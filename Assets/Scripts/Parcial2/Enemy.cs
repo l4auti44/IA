@@ -23,15 +23,24 @@ public class Enemy : MonoBehaviour
 
     public bool investigating = false;
 
+    [SerializeField]
+    private FOV _fov;
 
+    [SerializeField]
+    private float _maxSpeed;
+    private Vector3 _velocity;
+    [SerializeField]
+    private float _maxForce;
 
+    public FOV Fov { get { return _fov; } }
 
     void Start()
     {
         _pathfinding = new Pathfinding();
         _fsm = new FSMEnemy();
-        _fsm.AddStates(EnemyStates.Patrol, new PatrolNodesState(_fsm, this, _pathPatrol));
+        _fsm.AddStates(EnemyStates.Patrol, new PatrolNodesState(_fsm, this, _pathPatrol, _maxSpeed));
         _fsm.AddStates(EnemyStates.Pathfinding, new PathfindingState(_fsm, this));
+        _fsm.AddStates(EnemyStates.Chase, new ChaseState(_fsm, this));
         _fsm.ChangeState(EnemyStates.Patrol);
 
     }
@@ -53,5 +62,33 @@ public class Enemy : MonoBehaviour
 
 
         _fsm.Update();
+    }
+
+
+
+    public Vector3 Seek(Vector3 target)
+    {
+        Vector3 desired = target - transform.position;
+        desired.Normalize();
+        desired *= _maxSpeed;
+        Debug.DrawLine(transform.position, transform.position + desired, Color.gray);
+
+        Vector3 steering = desired - _velocity;
+        steering = Vector3.ClampMagnitude(steering, _maxForce * Time.deltaTime);
+
+        return steering;
+    }
+
+    public void AddForce(Vector3 force)
+    {
+        _velocity = Vector3.ClampMagnitude(_velocity + force, _maxSpeed);
+    }
+
+    public void Move()
+    {
+        _velocity = new Vector3(_velocity.x, _velocity.y, 0);  //FORCE 2D
+        transform.position += _velocity * Time.deltaTime;
+        if (_velocity.sqrMagnitude > 0.000001f)
+            transform.up = _velocity;
     }
 }

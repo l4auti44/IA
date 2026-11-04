@@ -5,21 +5,22 @@ public class PatrolNodesState : States
 {
     private Enemy _enemy;
     private List<Node> _pathPatrol;
-    private int _patrolSpeed = 6;
+    private float _patrolSpeed;
     private int _currentNodeIndex = 0;
 
-
-    public PatrolNodesState(FSMEnemy f, Enemy _enemy, List<Node> path)
+    public PatrolNodesState(FSMEnemy f, Enemy _enemy, List<Node> path, float patrolSpeed)
     {
         this.fsm = f;
         this._enemy = _enemy;
         this._pathPatrol = path;
+        this._patrolSpeed = patrolSpeed;
     }
 
 
     public override void OnEnter()
     {
-
+        _enemy.Fov.OnPlayerDetected += OnPlayerDetected;
+        
         _enemy.investigating = false;
 
         if (_pathPatrol.Contains(_enemy.targetNodePosition))
@@ -46,6 +47,8 @@ public class PatrolNodesState : States
     public override void OnUpdate()
     {
 
+        
+
         if (_enemy != null && _pathPatrol != null && _pathPatrol.Count != 0)
         {
             Movement();
@@ -54,7 +57,7 @@ public class PatrolNodesState : States
     }
     public override void OnExit()
     {
-        
+        _enemy.Fov.OnPlayerDetected -= OnPlayerDetected;
     }
 
     public void Movement()
@@ -85,6 +88,15 @@ public class PatrolNodesState : States
                 _currentNodeIndex = 0;
             }
 
+        }
+    }
+
+    private void OnPlayerDetected(bool isDetected)
+    {
+        if (isDetected)
+        {
+            Debug.Log("Player detected! Switching to ChaseState.");
+            fsm.ChangeState(EnemyStates.Chase);
         }
     }
 
