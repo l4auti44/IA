@@ -71,12 +71,16 @@ public class PatrolNodesState : States
 
         Node nextNode = _pathPatrol[_currentNodeIndex];
 
+        /*
         _enemy.transform.position = Vector3.MoveTowards(
             _enemy.transform.position,
             nextNode.transform.position,
             Time.deltaTime * _patrolSpeed
         );
-        _enemy.transform.up = (nextNode.transform.position - _enemy.transform.position).normalized;
+        */
+        _enemy.AddForce(_enemy.Seek(nextNode.transform.position), _patrolSpeed);
+        _enemy.Move();
+        //_enemy.transform.up = (nextNode.transform.position - _enemy.transform.position).normalized;
 
         if (Vector3.Distance(_enemy.transform.position, nextNode.transform.position) < 0.1f)
         {

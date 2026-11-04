@@ -5,22 +5,24 @@ using System.Linq;
 public class PathfindingState : States
 {
 
-    private int _chaseSpeed = 8;
     private Enemy _enemy;
     private List<Node> _path;
     private Node startNode;
     private int _currentNodeIndex = 0;
 
+    private float _pathFindSpeed;
 
 
-    public PathfindingState(FSMEnemy f, Enemy _enemy)
+
+    public PathfindingState(FSMEnemy f, Enemy _enemy, float pathFindSpeed)
     {
         this.fsm = f;
         this._enemy = _enemy;
-
+        this._pathFindSpeed = pathFindSpeed;
     }
     public override void OnEnter()
     {
+        _enemy.Fov.OnPlayerDetected += OnPlayerDetected;
         FindStartNode();
     }
 
@@ -65,6 +67,7 @@ public class PathfindingState : States
     public override void OnExit()
     {
         _currentNodeIndex = 0;
+        _enemy.Fov.OnPlayerDetected -= OnPlayerDetected;
     }
 
     public override void OnUpdate()
@@ -90,6 +93,7 @@ public class PathfindingState : States
 
         Node nextNode = _path[_currentNodeIndex];
 
+        /*
         _enemy.transform.position = Vector3.MoveTowards(
             _enemy.transform.position,
             nextNode.transform.position,
@@ -97,7 +101,9 @@ public class PathfindingState : States
         );
 
         _enemy.transform.up = (nextNode.transform.position - _enemy.transform.position).normalized;
-
+        */
+        _enemy.AddForce(_enemy.Seek(nextNode.transform.position), _pathFindSpeed);
+        _enemy.Move();
         if (Vector3.Distance(_enemy.transform.position, nextNode.transform.position) < 0.1f)
         {
             _currentNodeIndex++;
@@ -112,6 +118,15 @@ public class PathfindingState : States
         }
 
 
+    }
+
+    private void OnPlayerDetected(bool isDetected)
+    {
+        if (isDetected)
+        {
+            Debug.Log("Player detected! Switching to ChaseState.");
+            fsm.ChangeState(EnemyStates.Chase);
+        }
     }
 
 

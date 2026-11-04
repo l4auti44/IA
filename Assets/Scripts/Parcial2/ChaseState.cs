@@ -2,16 +2,17 @@ using UnityEngine;
 
 public class ChaseState : States
 {
-    private int _chaseSpeed = 8;
     private FSMEnemy _fsm;
     private Enemy _enemy;
     private FOV _fov;
 
-    public ChaseState(FSMEnemy fsm, Enemy enemy)
+    private float _chaseSpeed;
+    public ChaseState(FSMEnemy fsm, Enemy enemy, float chaseSpeed)
     {
         _enemy = enemy;
         _fov = _enemy.Fov;
         this._fsm = fsm;
+        this._chaseSpeed = chaseSpeed;
     }
     public override void OnEnter()
     {
@@ -27,7 +28,8 @@ public class ChaseState : States
 
     public override void OnUpdate()
     {
-        _enemy.AddForce(_enemy.Seek(_fov.target.position));
+        _enemy.AddForce(_enemy.Seek(_fov.target.position), _chaseSpeed);
+        _enemy.AddForce(_enemy.ObstacleAvoidance(), _chaseSpeed);
         _enemy.Move();
     }
 

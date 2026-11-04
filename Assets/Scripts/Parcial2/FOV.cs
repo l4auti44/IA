@@ -4,8 +4,11 @@ public class FOV : MonoBehaviour
 {
     [SerializeField] GameObject[] _viewObjects;
     [SerializeField] float _range = 1;
+
     [SerializeField] float _viewAngle = 90;
     [SerializeField] LayerMask _wallLayer;
+
+    public LayerMask WallLayer { get { return _wallLayer; } }
 
     private bool _isPlayerInFOV = false;
 

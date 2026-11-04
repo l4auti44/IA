@@ -100,7 +100,7 @@ GameObject:
   - component: {fileID: 832904491090608368}
   - component: {fileID: 8675697801236691337}
   m_Layer: 0
-  m_Name: Enemies
+  m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -198,8 +198,12 @@ MonoBehaviour:
   playerNodePosition: {fileID: 0}
   investigating: 0
   _fov: {fileID: 8675697801236691337}
-  _maxSpeed: 5
-  _maxForce: 25
+  _patrolSpeed: 3.5
+  _chaseSpeed: 5.5
+  _pathFindSpeed: 5
+  _maxForce: 100
+  obstacleRaycastLength: 2
+  DEBUG: 1
 --- !u!114 &8675697801236691337
 MonoBehaviour:
   m_ObjectHideFlags: 0
