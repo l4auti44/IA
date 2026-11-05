@@ -79,6 +79,48 @@ public class FOV : MonoBehaviour
         }
     }
 
+    public bool LineOfSight(GameObject target, bool ignoreAngle = false)
+    {
+        Vector3 dir = target.transform.position - transform.position;
+        dir.z = 0f;
+
+        if (dir.magnitude < _range)
+        {
+            //esta en el posible rango de vision y veo si esta dentro del ANGULO de vision.
+            if (ignoreAngle || Vector2.Angle(transform.up, dir) < _viewAngle / 2)
+            {
+                if (!Physics.Raycast(transform.position, dir, out RaycastHit hit, dir.magnitude, _wallLayer))//LineOfSight, si no choco con la pared
+                {
+                    Debug.DrawLine(transform.position, transform.position + dir, Color.white);
+                    //obj.GetComponent<Renderer>().material.color = Color.blue;
+                    return true;
+                }
+                else
+                {
+                    //choca con la apred y dibujo una linea roja
+                    Debug.DrawLine(transform.position, hit.point, Color.red);
+                    return false;
+                }
+            }
+            return false;
+        }
+        else
+        {
+            //no esta en el rango de posible vision
+            return false;
+        }
+    }
+
+
+    Vector3 GetVectorFromAngle(float angle)
+    {
+        return new Vector3(
+            -Mathf.Sin(angle * Mathf.Deg2Rad),
+            Mathf.Cos(angle * Mathf.Deg2Rad),
+            0
+        );
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
@@ -89,15 +131,5 @@ public class FOV : MonoBehaviour
 
         Gizmos.DrawLine(transform.position, transform.position + lineA * _range);
         Gizmos.DrawLine(transform.position, transform.position + lineB * _range);
-
-    }
-
-    Vector3 GetVectorFromAngle(float angle)
-    {
-        return new Vector3(
-            -Mathf.Sin(angle * Mathf.Deg2Rad),
-            Mathf.Cos(angle * Mathf.Deg2Rad),
-            0
-        );
     }
 }

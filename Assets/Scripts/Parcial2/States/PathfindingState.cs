@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Patterns.Observer.Struct_EventManager;
 
 public class PathfindingState : States
 {
@@ -23,6 +24,7 @@ public class PathfindingState : States
     public override void OnEnter()
     {
         _enemy.Fov.OnPlayerDetected += OnPlayerDetected;
+        EventManager.Subscribe<PlayerFoundData>(InvestigatePos);
         FindStartNode();
     }
 
@@ -30,8 +32,8 @@ public class PathfindingState : States
     {
         if (_enemy != null && GameManager.Instance != null && GameManager.Instance.nodes.Count != 0)
         {
+
             GameManager.Instance.FindNearestNode(_enemy.transform.position, out startNode);
-            
             if (startNode != null)
             {
                 _path = _enemy._pathfinding.AStar(startNode, _enemy.targetNodePosition);
@@ -58,6 +60,7 @@ public class PathfindingState : States
     {
         _currentNodeIndex = 0;
         _enemy.Fov.OnPlayerDetected -= OnPlayerDetected;
+        EventManager.Unsubscribe<PlayerFoundData>(InvestigatePos);
     }
 
     public override void OnUpdate()
@@ -81,17 +84,20 @@ public class PathfindingState : States
             return;
         }
 
+        // El índice actual es el nodo hacia el que estoy yendo.
+        // El siguiente es el candidato para saltearlo.
+        // este chequeo es solo para el primer nodo, para que no se saltee el resto del path.
+        if (_currentNodeIndex + 1 < _path.Count && _currentNodeIndex == 0)
+        {
+            Node candidate = _path[_currentNodeIndex + 1];
+
+            if (_enemy.Fov.LineOfSight(candidate.gameObject, ignoreAngle: true))
+            {
+                _currentNodeIndex++;
+            }
+        }
+
         Node nextNode = _path[_currentNodeIndex];
-
-        /*
-        _enemy.transform.position = Vector3.MoveTowards(
-            _enemy.transform.position,
-            nextNode.transform.position,
-            Time.deltaTime * _chaseSpeed
-        );
-
-        _enemy.transform.up = (nextNode.transform.position - _enemy.transform.position).normalized;
-        */
         _enemy.AddForce(_enemy.Seek(nextNode.transform.position), _pathFindSpeed);
         _enemy.Move();
         if (Vector3.Distance(_enemy.transform.position, nextNode.transform.position) < 0.1f)
@@ -119,6 +125,13 @@ public class PathfindingState : States
         }
     }
 
+    private void InvestigatePos(PlayerFoundData data)
+    {
+        _enemy.investigating = true;
+        _enemy.targetNodePosition = data.playerClosestNode;
+        _currentNodeIndex = 0;
+        FindStartNode();
+    }
 
 
 }

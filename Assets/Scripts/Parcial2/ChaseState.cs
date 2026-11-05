@@ -17,13 +17,13 @@ public class ChaseState : States
     public override void OnEnter()
     {
         _fov.OnPlayerDetected += OnPlayerUnDetected;
-        _enemy.GetComponent<Renderer>().material.color = Color.red;
+        //_enemy.GetComponent<Renderer>().material.color = Color.red;
     }
 
     public override void OnExit()
     {
         _fov.OnPlayerDetected -= OnPlayerUnDetected;
-        _enemy.GetComponent<Renderer>().material.color = Color.magenta;
+        //_enemy.GetComponent<Renderer>().material.color = Color.magenta;
     }
 
     public override void OnUpdate()

@@ -23,9 +23,9 @@ public class PatrolNodesState : States
     {
         _enemy.Fov.OnPlayerDetected += OnPlayerDetected;
         EventManager.Subscribe<PlayerFoundData>(InvestigatePos);
-        
 
-        
+
+
         _enemy.investigating = false;
 
         if (_pathPatrol.Contains(_enemy.targetNodePosition))
@@ -33,21 +33,35 @@ public class PatrolNodesState : States
             _currentNodeIndex = _pathPatrol.IndexOf(_enemy.targetNodePosition);
 
         }
-        // ESTOY CERCA DEL pathpatrol
-        if (Vector3.Distance(_enemy.transform.position, _pathPatrol[_currentNodeIndex].transform.position) < 0.1f)
-        {
-            Debug.Log("Estoy cerca de la zona de patrulla, patrullo");
-            _currentNodeIndex = _pathPatrol.IndexOf(_enemy.targetNodePosition);
-            // SÍ. Continúo patrullando
-            return;
-        }
+        // Busco primero con Line of Sight si estoy cerca de un nodo del pathPatrol
+        if (CheckIfNearPatrolNode()) return;
 
-        Debug.Log("No estoy cerca del target node, cambio a pathfinding");
+        //sino veo ningun nodo, pathfind
+
+        Debug.Log("No estoy cerca del target node");
+        //PAthfinding al nodo mas cercano del path
         //el nodo mas cercano del enemigo al path
         _enemy.targetNodePosition = _pathPatrol[_currentNodeIndex];
         fsm.ChangeState(EnemyStates.Pathfinding);
+
     }
 
+
+
+    private bool CheckIfNearPatrolNode()
+    {
+        foreach (Node node in _pathPatrol)
+        {
+            bool isOnLineOfSight = _enemy.Fov.LineOfSight(node.gameObject);
+            if (isOnLineOfSight)
+            {
+                _currentNodeIndex = _pathPatrol.IndexOf(node);
+                Debug.Log("Estoy viendo al nodo de patrulla: " + node.name);
+                return true;
+            }
+        }
+        return false;
+    }
 
     public override void OnUpdate()
     {
@@ -62,7 +76,7 @@ public class PatrolNodesState : States
     {
         _enemy.Fov.OnPlayerDetected -= OnPlayerDetected;
         EventManager.Unsubscribe<PlayerFoundData>(InvestigatePos);
-        
+
     }
 
     public void Movement()
@@ -76,16 +90,10 @@ public class PatrolNodesState : States
 
         Node nextNode = _pathPatrol[_currentNodeIndex];
 
-        /*
-        _enemy.transform.position = Vector3.MoveTowards(
-            _enemy.transform.position,
-            nextNode.transform.position,
-            Time.deltaTime * _patrolSpeed
-        );
-        */
+        IsPatrolNodeVisible(nextNode);
+  
         _enemy.AddForce(_enemy.Seek(nextNode.transform.position), _patrolSpeed);
         _enemy.Move();
-        //_enemy.transform.up = (nextNode.transform.position - _enemy.transform.position).normalized;
 
         if (Vector3.Distance(_enemy.transform.position, nextNode.transform.position) < 0.1f)
         {
@@ -97,6 +105,24 @@ public class PatrolNodesState : States
                 _currentNodeIndex = 0;
             }
 
+        }
+    }
+
+    private void IsPatrolNodeVisible(Node nextNode)
+    {
+        float distance = Vector3.Distance(_enemy.transform.position, nextNode.transform.position);
+        //raycast para ver si hay pared
+        if (Physics.Raycast(_enemy.transform.position, nextNode.transform.position - _enemy.transform.position, out RaycastHit hit, distance, _enemy.Fov.WallLayer))
+        {
+            Debug.DrawLine(_enemy.transform.position, hit.point, Color.red);
+            //si hay pared, pathfind al nodo
+            _enemy.targetNodePosition = nextNode;
+            fsm.ChangeState(EnemyStates.Pathfinding);
+            return;
+        }
+        else
+        {
+            Debug.DrawLine(_enemy.transform.position, nextNode.transform.position, Color.green);
         }
     }
 
