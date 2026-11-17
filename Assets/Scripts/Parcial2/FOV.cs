@@ -9,6 +9,12 @@ public class FOV : MonoBehaviour
     [SerializeField] float _viewAngle = 90;
     [SerializeField] LayerMask _wallLayer;
 
+    [SerializeField, Min(0f)]
+    [Tooltip("Distancia desde el centro hasta cada rayo lateral, en unidades del mundo.")]
+    private float _lineOfSightOffset = 0.5f;
+
+    private Transform _lineOfSightTarget;
+
     public LayerMask WallLayer { get { return _wallLayer; } }
 
     private bool _isPlayerInFOV = false;
@@ -81,34 +87,42 @@ public class FOV : MonoBehaviour
 
     public bool LineOfSight(GameObject target, bool ignoreAngle = false)
     {
+        _lineOfSightTarget = target != null ? target.transform : null;
+        if (_lineOfSightTarget == null) return false;
+
         Vector3 dir = target.transform.position - transform.position;
         dir.z = 0f;
 
-        if (dir.magnitude < _range)
-        {
-            //esta en el posible rango de vision y veo si esta dentro del ANGULO de vision.
-            if (ignoreAngle || Vector2.Angle(transform.up, dir) < _viewAngle / 2)
-            {
-                if (!Physics.Raycast(transform.position, dir, out RaycastHit hit, dir.magnitude, _wallLayer))//LineOfSight, si no choco con la pared
-                {
-                    Debug.DrawLine(transform.position, transform.position + dir, Color.white);
-                    //obj.GetComponent<Renderer>().material.color = Color.blue;
-                    return true;
-                }
-                else
-                {
-                    //choca con la apred y dibujo una linea roja
-                    Debug.DrawLine(transform.position, hit.point, Color.red);
-                    return false;
-                }
-            }
+        if (dir.magnitude >= _range) return false;
+        if (!ignoreAngle && Vector2.Angle(transform.up, dir) >= _viewAngle / 2)
             return false;
-        }
-        else
+
+        return CheckSideRays(dir);
+    }
+
+    private bool CheckSideRays(Vector3 dir, bool drawGizmos = false)
+    {
+        float distance = dir.magnitude;
+        if (distance <= 0.00001f) return true;
+
+        Vector3 direction = dir / distance;
+        // Perpendicular al trayecto en XY: los dos rayos conservan su separacion.
+        Vector3 side = new Vector3(-direction.y, direction.x, 0f) * _lineOfSightOffset;
+        Vector3 leftOrigin = transform.position + side;
+        Vector3 rightOrigin = transform.position - side;
+
+        bool leftBlocked = Physics.Raycast(leftOrigin, direction, distance, _wallLayer);
+        bool rightBlocked = Physics.Raycast(rightOrigin, direction, distance, _wallLayer);
+
+        if (drawGizmos)
         {
-            //no esta en el rango de posible vision
-            return false;
+            Gizmos.color = leftBlocked ? Color.red : Color.green;
+            Gizmos.DrawLine(leftOrigin, leftOrigin + dir);
+            Gizmos.color = rightBlocked ? Color.red : Color.green;
+            Gizmos.DrawLine(rightOrigin, rightOrigin + dir);
         }
+
+        return !leftBlocked && !rightBlocked;
     }
 
 
@@ -123,6 +137,7 @@ public class FOV : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        Color previousColor = Gizmos.color;
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, _range);
 
@@ -131,5 +146,14 @@ public class FOV : MonoBehaviour
 
         Gizmos.DrawLine(transform.position, transform.position + lineA * _range);
         Gizmos.DrawLine(transform.position, transform.position + lineB * _range);
+
+        // muestra el ultimo destino consultado por LineOfSight
+        // Sin destino, previsualizar los offsets hacia adelante.
+        Vector3 dir = _lineOfSightTarget != null
+            ? _lineOfSightTarget.position - transform.position
+            : transform.up * _range;
+        dir.z = 0f;
+        CheckSideRays(dir, drawGizmos: true);
+        Gizmos.color = previousColor;
     }
 }

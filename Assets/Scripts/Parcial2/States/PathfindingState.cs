@@ -7,11 +7,14 @@ public class PathfindingState : States
 {
 
     private Enemy _enemy;
+    private EnemyFeedback _feedback;
     private List<Node> _path;
     private Node startNode;
     private int _currentNodeIndex = 0;
 
     private float _pathFindSpeed;
+    private bool _waiting;
+    private float _waitTimer;
 
 
 
@@ -19,10 +22,13 @@ public class PathfindingState : States
     {
         this.fsm = f;
         this._enemy = _enemy;
+        _feedback = _enemy.GetComponent<EnemyFeedback>();
         this._pathFindSpeed = pathFindSpeed;
     }
     public override void OnEnter()
     {
+        _waiting = false;
+        _waitTimer = 0f;
         _enemy.Fov.OnPlayerDetected += OnPlayerDetected;
         EventManager.Subscribe<PlayerFoundData>(InvestigatePos);
         FindStartNode();
@@ -58,6 +64,8 @@ public class PathfindingState : States
 
     public override void OnExit()
     {
+        if (_waiting && _feedback != null) _feedback.StopLostFeedback();
+        _waiting = false;
         _currentNodeIndex = 0;
         _enemy.Fov.OnPlayerDetected -= OnPlayerDetected;
         EventManager.Unsubscribe<PlayerFoundData>(InvestigatePos);
@@ -65,9 +73,17 @@ public class PathfindingState : States
 
     public override void OnUpdate()
     {
-        // SI EL PLAYER ESTA DENTRO DEL FOV, CAMBIAR A CHASESTATE
+        if (_waiting)
+        {
+            _waitTimer += Time.deltaTime;
 
+            if (_waitTimer >= 1f)
+            {
+                fsm.ChangeState(EnemyStates.Patrol);
+            }
 
+            return;
+        }
 
         if (_path != null && _path.Count > 0)
         {
@@ -83,6 +99,7 @@ public class PathfindingState : States
         {
             return;
         }
+
 
         // El índice actual es el nodo hacia el que estoy yendo.
         // El siguiente es el candidato para saltearlo.
@@ -107,8 +124,16 @@ public class PathfindingState : States
             if (_currentNodeIndex >= _path.Count)
             {
 
-                // LLEGUE
-                fsm.ChangeState(EnemyStates.Patrol);
+                if (_enemy.investigating)
+                {
+                    _waiting = true;
+                    _waitTimer = 0f;
+                    if (_feedback != null) _feedback.PlayLostFeedback();
+                }
+                else
+                {
+                    fsm.ChangeState(EnemyStates.Patrol);
+                }
             }
 
         }
@@ -127,6 +152,9 @@ public class PathfindingState : States
 
     private void InvestigatePos(PlayerFoundData data)
     {
+        if (_waiting && _feedback != null) _feedback.StopLostFeedback();
+        _waiting = false;
+        _waitTimer = 0f;
         _enemy.investigating = true;
         _enemy.targetNodePosition = data.playerClosestNode;
         _currentNodeIndex = 0;
